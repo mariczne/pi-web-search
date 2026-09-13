@@ -1,5 +1,5 @@
 import type { ExtensionContext, AgentToolUpdateCallback } from "@earendil-works/pi-coding-agent";
-import type { Api, Model } from "@earendil-works/pi-ai";
+import { clampThinkingLevel, type Api, type Model, type ModelThinkingLevel } from "@earendil-works/pi-ai";
 import { getEnvApiKey } from "@earendil-works/pi-ai/compat";
 import { TextEncoder, TextDecoder } from "util";
 
@@ -662,7 +662,8 @@ async function callOpenAIStream(
     model: Model<Api>,
     prompt: string,
     onUpdate?: AgentToolUpdateCallback,
-    signal?: AbortSignal
+    signal?: AbortSignal,
+    thinkingLevel?: ModelThinkingLevel
 ): Promise<StreamResult> {
     const auth = await getAuth(ctx, model);
     if (!auth.ok) {
@@ -710,8 +711,15 @@ async function callOpenAIStream(
         stream: true,
         store: false,
     };
-    // Let the provider choose its supported reasoning default. Some reasoning
-    // models reject "none", and supported effort levels vary between models.
+    // Inherit the live session setting, clamped/mapped for the selected search
+    // model (which can differ from the conversation model). Keep provider defaults
+    // when thinking is off/unavailable; do not reintroduce an implicit "none".
+    // xAI shares this transport but does not share OpenAI's effort semantics.
+    if (!isXai && model.reasoning && thinkingLevel && thinkingLevel !== "off") {
+        const level = clampThinkingLevel(model, thinkingLevel);
+        const effort = model.thinkingLevelMap?.[level] ?? level;
+        if (level !== "off") requestBody.reasoning = { effort };
+    }
     if (isCodex) {
         requestBody.instructions = "Answer the user's request using web search when needed.";
         requestBody.text = { verbosity: "low" };
@@ -1045,7 +1053,8 @@ export async function callApiStream(
     model: Model<Api>,
     body: any,
     onUpdate?: AgentToolUpdateCallback,
-    signal?: AbortSignal
+    signal?: AbortSignal,
+    thinkingLevel?: ModelThinkingLevel
 ): Promise<StreamResult> {
     const kind = getProviderKind(model);
     if (kind === "google") {
@@ -1058,7 +1067,7 @@ export async function callApiStream(
     }
 
     if (kind === "openai" || kind === "xai") {
-        return callOpenAIStream(ctx, model, prompt, onUpdate, signal);
+        return callOpenAIStream(ctx, model, prompt, onUpdate, signal, thinkingLevel);
     }
     if (kind === "anthropic") {
         return callAnthropicStream(ctx, model, prompt, onUpdate, signal);
