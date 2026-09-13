@@ -911,6 +911,7 @@ test('Anthropic stream sends the Claude Code system prompt for OAuth credentials
   globalThis.fetch = async (_url, init) => {
     const body = JSON.parse(init.body);
     assert.equal(init.headers.Authorization, 'Bearer sk-ant-oat01-test');
+    assert.equal(init.headers['user-agent'], 'claude-cli/2.1.251');
     assert.deepEqual(body.system, [
       { type: 'text', text: "You are Claude Code, Anthropic's official CLI for Claude." },
     ]);
@@ -940,6 +941,7 @@ test('Anthropic stream omits the system prompt for API key credentials', async (
   globalThis.fetch = async (_url, init) => {
     const body = JSON.parse(init.body);
     assert.equal(init.headers['x-api-key'], 'sk-ant-api03-test');
+    assert.equal(init.headers['user-agent'], undefined);
     assert.equal(body.system, undefined);
     return makeResponse([
       { data: { type: 'content_block_delta', index: 0, delta: { type: 'text_delta', text: 'API key accepted' } } },

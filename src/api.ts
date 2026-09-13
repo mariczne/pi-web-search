@@ -898,7 +898,7 @@ async function callAnthropicStream(
             headers["anthropic-beta"] = headers["anthropic-beta"]
                 ? `${headers["anthropic-beta"]},claude-code-20250219,oauth-2025-04-20`
                 : "claude-code-20250219,oauth-2025-04-20";
-            headers["user-agent"] = headers["user-agent"] || "claude-cli/2.1.75";
+            headers["user-agent"] = headers["user-agent"] || "claude-cli/2.1.251";
             headers["x-app"] = headers["x-app"] || "cli";
         } else if (!headers["x-api-key"] && !headers["X-Api-Key"]) {
             headers["x-api-key"] = auth.apiKey;
