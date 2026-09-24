@@ -911,7 +911,7 @@ test('Anthropic stream sends the Claude Code system prompt for OAuth credentials
   globalThis.fetch = async (_url, init) => {
     const body = JSON.parse(init.body);
     assert.equal(init.headers.Authorization, 'Bearer sk-ant-oat01-test');
-    assert.equal(init.headers['user-agent'], 'claude-cli/2.1.251');
+    assert.equal(init.headers['user-agent'], 'claude-cli/2.1.280');
     assert.deepEqual(body.system, [
       { type: 'text', text: "You are Claude Code, Anthropic's official CLI for Claude." },
     ]);
