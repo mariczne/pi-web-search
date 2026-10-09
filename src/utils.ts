@@ -1,23 +1,13 @@
 import type { ExtensionContext, AgentToolResult } from "@earendil-works/pi-coding-agent";
 import type { Api, Model } from "@earendil-works/pi-ai";
-import { truncateHead, DEFAULT_MAX_BYTES, DEFAULT_MAX_LINES, getAgentDir } from "@earendil-works/pi-coding-agent";
+import { getAgentDir } from "@earendil-works/pi-coding-agent";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { getProviderKind } from "./api.ts";
 
-// --- Formatting ---
-
-export function formatResult(text: string, details: any): AgentToolResult<any> {
-    const { content, truncated } = truncateHead(text, { maxLines: DEFAULT_MAX_LINES, maxBytes: DEFAULT_MAX_BYTES });
-    return {
-        content: [{ type: "text", text: content + (truncated ? "\n\n[Truncated]" : "") }],
-        details
-    };
-}
-
 // --- Model Selection ---
 
-const SUPPORTED_PROVIDERS = ["google-generative-ai", "xai", "openai-responses", "azure-openai-responses", "openai-codex-responses", "anthropic-messages"];
+const SUPPORTED_PROVIDERS = ["deepseek", "google-generative-ai", "antigravity", "xai", "openai-responses", "azure-openai-responses", "openai-codex-responses", "anthropic-messages", "ollama"];
 
 type WebSearchModelConfig =
     | { status: "missing"; path: string; }
